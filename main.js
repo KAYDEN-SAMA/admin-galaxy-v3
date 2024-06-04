@@ -26,8 +26,6 @@ const showPasswordCheckbox = document.getElementById("showPassword");
 const loginForm = document.getElementById("LoginForm");
 const dataSection = document.getElementById("dataSection");
 
-let selectedPlanet = "earth";
-
 onAuthStateChanged(auth, user => {
   if (user) {
     loginForm.style.display = "none";
@@ -41,6 +39,8 @@ onAuthStateChanged(auth, user => {
   }
 });
 
+let selectedPlanet = localStorage.getItem('selectedPlanet') || "earth";
+
 function loadUserData(user) {
   const adminUid = user.uid;
   get(ref(db, `admins/${adminUid}`)).then(adminSnapshot => {
@@ -51,20 +51,27 @@ function loadUserData(user) {
         const option = document.createElement('option');
         option.value = planet.trim();
         option.textContent = planet.trim();
+        if (planet.trim() === selectedPlanet) {
+          option.selected = true;
+        }
         planetDropDown.appendChild(option);
-        loadPlanetData(selectedPlanet)
       });
+      loadPlanetData(selectedPlanet);
 
       planetDropDown.addEventListener('change', function() {
         selectedPlanet = this.value;
+        localStorage.setItem('selectedPlanet', this.value);
         loadPlanetData(selectedPlanet);
       });
-      
-      function loadPlanetData(){
-              const header = document.getElementById("header");
-              const addMemberDiv = document.getElementById("addMemberDiv");
-              get(ref(db, `planets/${selectedPlanet}`)).then(allowedPlanetSnapshot => {
-                if (allowedPlanetSnapshot.exists()) {
+    }
+  });
+}
+
+function loadPlanetData(selectedPlanet) {
+  const header = document.getElementById("header");
+  const addMemberDiv = document.getElementById("addMemberDiv");
+  get(ref(db, `planets/${selectedPlanet}`)).then(allowedPlanetSnapshot => {
+    if (allowedPlanetSnapshot.exists()) {
                   dataSection.innerHTML = "";
                   addMemberDiv.innerHTML = "";
         
@@ -148,9 +155,6 @@ function loadUserData(user) {
                     createMemberCard(memberId, memberData);
                   });
                 }
-              });
-      }
-    }
   });
 }
 
@@ -255,7 +259,6 @@ function createMemberCard(memberId, memberData) {
   card.appendChild(iconsDiv);
   dataSection.appendChild(card);
 }
-
 
 showPasswordCheckbox.addEventListener('change', function() {
   passwordInput.type = this.checked ? "text" : "password";
