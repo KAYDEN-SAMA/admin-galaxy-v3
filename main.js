@@ -72,89 +72,130 @@ function loadPlanetData(selectedPlanet) {
   const addMemberDiv = document.getElementById("addMemberDiv");
   get(ref(db, `planets/${selectedPlanet}`)).then(allowedPlanetSnapshot => {
     if (allowedPlanetSnapshot.exists()) {
-                  dataSection.innerHTML = "";
-                  addMemberDiv.innerHTML = "";
+      dataSection.innerHTML = "";
+      addMemberDiv.innerHTML = "";
+      
+      const addMemberBtn = document.createElement('i');
+      
+      addMemberBtn.className = "fa-sharp fa-solid fa-plus";
+      addMemberBtn.id = 'addMemberBtn';
+      
+      addMemberDiv.appendChild(addMemberBtn);
+      header.appendChild(addMemberDiv);
+      
+      addMemberBtn.addEventListener('click', () => {
+        const dialog = document.createElement('div');
+        dialog.innerHTML = `<div class="dialog"><label for="username">اللقب:</label><input type="text" id="username" placeholder="اللقب" maxlength="12"><label for="rank">الرتبة:</label><input type="text" id="rank" placeholder="الرتبة" maxlength="12"><label for="balance">الرصيد:</label><input type="number" id="balance" placeholder="الرصيد"><label for="bagage">السلعة:</label><input type="text" id="bagage" placeholder="السلعة"><label for="warnings">الإنذارات:</label><input type="number" id="warnings" placeholder="الإنذارات"><p id="errorElm"></p><div class="buttons-div"><button id="confirmBtn">تأكيد</button><button id="cancelBtn">إلغاء</button></div></div>`;
+        document.body.appendChild(dialog);
+        document.body.classList.add('modal-open');
         
-                  const addMemberBtn = document.createElement('i');
-                  addMemberBtn.className = "fa-sharp fa-solid fa-plus";
-                  addMemberBtn.id = 'addMemberBtn';
-                  addMemberDiv.appendChild(addMemberBtn);
-                  header.appendChild(addMemberDiv);
+        const confirmBtn = document.getElementById('confirmBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        confirmBtn.addEventListener('click', () => {
+          const usernameInput = document.getElementById('username');
+          const rankInput = document.getElementById('rank');
+          const balanceInput = document.getElementById('balance');
+          const bagageInput = document.getElementById('bagage');
+          const warningsInput = document.getElementById('warnings');
+          const errorElm = document.getElementById('errorElm');
+          const username = usernameInput.value.trim();
+          const rank = rankInput.value.trim();
+          const balance = balanceInput.value.trim();
+          const bagage = bagageInput.value.trim();
+          const warnings = warningsInput.value.trim();
+          if (username === "" || rank === "" || balance === "" || bagage === "" || warnings === "") {
+            errorElm.textContent = "إملأ كل الحقول المطلوبة";
+          } else {
+            const newMemberRef = ref(db, `planets/${selectedPlanet}/${username}`);
+            set(newMemberRef, {
+              username: username,
+              rank: rank,
+              balance: balance,
+              bagage: bagage,
+              warnings: warnings
+            }).then(() => {
+              alert('تم إضافة العضو بنجاح!');
+              dialog.remove();
+              location.reload();
+            }).catch(error => {
+              alert('حصل خطأ أثناء إضافة العضو: ' + error.message);
+            });
+          }
+        });
         
-                  addMemberBtn.addEventListener('click', () => {
-                    const dialog = document.createElement('div');
-                    dialog.innerHTML = `<div class="dialog">
-                      <label for="username">اللقب:</label>
-                      <input type="text" id="username" placeholder="اللقب" maxlength="12">
-                      <label for="rank">الرتبة:</label>
-                      <input type="text" id="rank" placeholder="الرتبة" maxlength="12">
-                      <label for="balance">الرصيد:</label>
-                      <input type="number" id="balance" placeholder="الرصيد">
-                      <label for="bagage">السلعة:</label>
-                      <input type="text" id="bagage" placeholder="السلعة">
-                      <label for="warnings">الإنذارات:</label>
-                      <input type="number" id="warnings" placeholder="الإنذارات">
-                      <p id="errorElm"></p>
-                      <div class="buttons-div">
-                        <button id="confirmBtn">تأكيد</button>
-                        <button id="cancelBtn">إلغاء</button>
-                      </div>
-                      </div>`;
-                    document.body.appendChild(dialog);
-                    document.body.classList.add('modal-open');
+        cancelBtn.addEventListener('click', () => {
+          dialog.remove();
+          document.body.classList.remove('modal-open');
+        });
+      });
+      const planetData = allowedPlanetSnapshot.val();
+      const sortedMemberIds = Object.keys(planetData).sort((a, b) => {
+        const valueA = planetData[a].toString();
+        const valueB = planetData[b].toString();
+        return valueA.localeCompare(valueB, 'ar');
+      });
+      sortedMemberIds.forEach(memberId => {
+        const memberData = planetData[memberId];
+        createMemberCard(memberId, memberData);
+      });
+    } else {
+        addMemberDiv.innerHTML = "";
+      
+      const addMemberBtn = document.createElement('i');
+      
+      addMemberBtn.className = "fa-sharp fa-solid fa-plus";
+      addMemberBtn.id = 'addMemberBtn';
+      
+      addMemberDiv.appendChild(addMemberBtn);
+      header.appendChild(addMemberDiv);
+      
+      addMemberBtn.addEventListener('click', () => {
+        const dialog = document.createElement('div');
+        dialog.innerHTML = `<div class="dialog"><label for="username">اللقب:</label><input type="text" id="username" placeholder="اللقب" maxlength="12"><label for="rank">الرتبة:</label><input type="text" id="rank" placeholder="الرتبة" maxlength="12"><label for="balance">الرصيد:</label><input type="number" id="balance" placeholder="الرصيد"><label for="bagage">السلعة:</label><input type="text" id="bagage" placeholder="السلعة"><label for="warnings">الإنذارات:</label><input type="number" id="warnings" placeholder="الإنذارات"><p id="errorElm"></p><div class="buttons-div"><button id="confirmBtn">تأكيد</button><button id="cancelBtn">إلغاء</button></div></div>`;
+        document.body.appendChild(dialog);
+        document.body.classList.add('modal-open');
         
-                    const confirmBtn = document.getElementById('confirmBtn');
-                    const cancelBtn = document.getElementById('cancelBtn');
-                    confirmBtn.addEventListener('click', () => {
-                      const usernameInput = document.getElementById('username');
-                      const rankInput = document.getElementById('rank');
-                      const balanceInput = document.getElementById('balance');
-                      const bagageInput = document.getElementById('bagage');
-                      const warningsInput = document.getElementById('warnings');
-                      const errorElm = document.getElementById('errorElm');
-                      const username = usernameInput.value.trim();
-                      const rank = rankInput.value.trim();
-                      const balance = balanceInput.value.trim();
-                      const bagage = bagageInput.value.trim();
-                      const warnings = warningsInput.value.trim();
+        const confirmBtn = document.getElementById('confirmBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        confirmBtn.addEventListener('click', () => {
+          const usernameInput = document.getElementById('username');
+          const rankInput = document.getElementById('rank');
+          const balanceInput = document.getElementById('balance');
+          const bagageInput = document.getElementById('bagage');
+          const warningsInput = document.getElementById('warnings');
+          const errorElm = document.getElementById('errorElm');
+          const username = usernameInput.value.trim();
+          const rank = rankInput.value.trim();
+          const balance = balanceInput.value.trim();
+          const bagage = bagageInput.value.trim();
+          const warnings = warningsInput.value.trim();
+          if (username === "" || rank === "" || balance === "" || bagage === "" || warnings === "") {
+            errorElm.textContent = "إملأ كل الحقول المطلوبة";
+          } else {
+            const newMemberRef = ref(db, `planets/${selectedPlanet}/${username}`);
+            set(newMemberRef, {
+              username: username,
+              rank: rank,
+              balance: balance,
+              bagage: bagage,
+              warnings: warnings
+            }).then(() => {
+              alert('تم إضافة العضو بنجاح!');
+              dialog.remove();
+              location.reload();
+            }).catch(error => {
+              alert('حصل خطأ أثناء إضافة العضو: ' + error.message);
+            });
+          }
+        });
         
-                      if (username === "" || rank === "" || balance === "" || bagage === "" || warnings === "") {
-                        errorElm.textContent = "إملأ كل الحقول المطلوبة";
-                      } else {
-                        const newMemberRef = ref(db, `planets/${selectedPlanet}/${username}`);
-                        set(newMemberRef, {
-                          username: username,
-                          rank: rank,
-                          balance: balance,
-                          bagage: bagage,
-                          warnings: warnings
-                        }).then(() => {
-                          alert('تم إضافة العضو بنجاح!');
-                          dialog.remove();
-                          location.reload();
-                        }).catch(error => {
-                          alert('حصل خطأ أثناء إضافة العضو: ' + error.message);
-                        });
-                      }
-                    });
-        
-                    cancelBtn.addEventListener('click', () => {
-                      dialog.remove();
-                      document.body.classList.remove('modal-open');
-                    });
-                  });
-        
-                  const planetData = allowedPlanetSnapshot.val();
-                  const sortedMemberIds = Object.keys(planetData).sort((a, b) => {
-                    const valueA = planetData[a].toString();
-                    const valueB = planetData[b].toString();
-                    return valueA.localeCompare(valueB, 'ar');
-                  });
-                  sortedMemberIds.forEach(memberId => {
-                    const memberData = planetData[memberId];
-                    createMemberCard(memberId, memberData);
-                  });
-                }
+        cancelBtn.addEventListener('click', () => {
+          dialog.remove();
+          document.body.classList.remove('modal-open');
+        });
+      });
+      dataSection.innerHTML = "";
+    }
   });
 }
 
