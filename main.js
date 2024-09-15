@@ -46,6 +46,11 @@ function loadUserData(user) {
   get(ref(db, `admins/${adminUid}`)).then(adminSnapshot => {
     if (adminSnapshot.exists()) {
       const data = adminSnapshot.val();
+      //add the search bar
+      const searchBar = document.getElementById('searchBar');
+      
+      searchBar.style.display = "flex";
+      
       const planetDropDown = document.getElementById('selectedPlanet');
       data.allowedPlanets.forEach(planet => {
         const option = document.createElement('option');
@@ -63,6 +68,12 @@ function loadUserData(user) {
         localStorage.setItem('selectedPlanet', this.value);
         loadPlanetData(selectedPlanet);
       });
+      
+      //add functionanlity to the search bar
+      usernameSearchInput.addEventListener('input', () => {
+        let searchValue = usernameSearchInput.value.trim();
+        
+      })
     }
   });
 }
@@ -138,6 +149,27 @@ function loadPlanetData(selectedPlanet) {
         const memberData = planetData[memberId];
         createMemberCard(memberId, memberData);
       });
+      
+      const filterInput = document.getElementById('usernameSearchInput');
+      const searchButton = document.getElementById('searchButton');
+      
+      function filterMembers() {
+        const filterValue = filterInput.value.trim().toLowerCase();
+        dataSection.innerHTML = "";
+        sortedMemberIds.forEach(memberId => {
+          const memberData = planetData[memberId];
+          if (memberId.toLowerCase().startsWith(filterValue)) {
+            createMemberCard(memberId, memberData);
+          }
+        });
+      }
+      
+      // Add event listener for input change
+      filterInput.addEventListener('input', filterMembers);
+      
+      // Initial display of members
+      filterMembers();
+      searchButton.addEventListener('click', filterMembers);
     } else {
         addMemberDiv.innerHTML = "";
       
