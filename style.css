@@ -104,6 +104,12 @@ main section {
   background-color: #004085;
 }
 
+.top-section {
+  display: none;
+  padding: 5%;
+  background-color: white;
+}
+
 .checkboxDiv {
   display: flex;
   align-items: center;
@@ -289,7 +295,6 @@ footer {
   left: 0;
   bottom: 0;
   width: 100%;
-  border-top: 1px solid #333;
   padding: 5%;
   color: #ffffff;
 }
